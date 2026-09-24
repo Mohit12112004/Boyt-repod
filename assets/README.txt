@@ -1,0 +1,1 @@
+Replace these with your own bot-avatar.png, bot-banner.png and logo.png. Discord application avatar/banner are set in the Developer Portal.

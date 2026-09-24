@@ -1,0 +1,6 @@
+const db=require("../database/database");const {log}=require("../log");
+function emojiKey(r){return r.emoji.id?`<:${r.emoji.name}:${r.emoji.id}>`:r.emoji.name;}
+module.exports=client=>{
+ client.on("messageReactionAdd",async(reaction,user)=>{if(user.bot)return;if(reaction.partial)await reaction.fetch().catch(()=>{});const k=emojiKey(reaction);const rows=db.prepare("SELECT role_id FROM reaction_roles WHERE guild_id=? AND message_id=? AND emoji=?").all(reaction.message.guildId,reaction.message.id,k);const member=await reaction.message.guild.members.fetch(user.id).catch(()=>null);for(const r of rows){await member?.roles.add(r.role_id).catch(()=>{});await log(client,"Reaction Role Added",`${user} received <@&${r.role_id}> via ${k}.`);}});
+ client.on("messageReactionRemove",async(reaction,user)=>{if(user.bot)return;if(reaction.partial)await reaction.fetch().catch(()=>{});const k=emojiKey(reaction);const rows=db.prepare("SELECT role_id FROM reaction_roles WHERE guild_id=? AND message_id=? AND emoji=?").all(reaction.message.guildId,reaction.message.id,k);const member=await reaction.message.guild.members.fetch(user.id).catch(()=>null);for(const r of rows){await member?.roles.remove(r.role_id).catch(()=>{});await log(client,"Reaction Role Removed",`${user} lost <@&${r.role_id}> via ${k}.`);}});
+};
